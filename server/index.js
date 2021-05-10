@@ -7,8 +7,11 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-const db = monk('localhost/woofer');
+// if MONGO_URI variable is defined, connect to it that database. 
+//Otherwise, connect to localhost database
+const db = monk(process.env.MONGO_URI || 'localhost/woofer');
 const woofs = db.get('woofs');
+const users = db.get('users');
 const filter = new Filter();
 
 app.use(cors());
@@ -78,7 +81,7 @@ app.post('/users',
 
 // Test with Postman - get all users
 app.get('/users', (req, res) => {
-  Users.find()
+  users.find()
     .then((users) => {
       res.status(201).json(users);
     })
@@ -91,7 +94,7 @@ app.get('/users', (req, res) => {
 
 // Test with Postman - get a user by username
 app.get('/users/:Username', (req, res) => {
-  Users.findOne( { Username: req.params.Username } )
+  users.findOne( { Username: req.params.Username } )
     .then((user) => {
       res.json(user);
     })
@@ -120,7 +123,7 @@ app.put('/users/:Username',
     return res.status(422).json({ errors: errors.array() });
   }
 
-  Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
+  users.findOneAndUpdate({ Username: req.params.Username }, { $set:
     {
       Username: req.body.Username,
       Password: req.body.Username,
